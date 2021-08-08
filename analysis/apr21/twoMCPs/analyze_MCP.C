@@ -3,11 +3,15 @@ int analyze_MCP() {
     44730,44731,44732,44733,44734};
 
   TList *list[15];
+  TH2D *TRKxyMCP0[15];
+  TH2D *TRKxyMCP1[15];
   TH2D *TRKxyMCPI[15];
   TH2D *MCPta0[15];
   for(int irun=0; irun!=15; ++irun) {
     list[irun] = (TList*) TFile::Open( Form("AnalysisOutput_%d.root",run[irun]) )->Get("output");
     //list[irun]->ls();
+    TRKxyMCP0[irun] = (TH2D*) list[irun]->FindObject("fTRKxyMCP0");
+    TRKxyMCP1[irun] = (TH2D*) list[irun]->FindObject("fTRKxyMCP1");
     TRKxyMCPI[irun] = (TH2D*) list[irun]->FindObject("fTRKxyMCPI");
     MCPta0[irun] = (TH2D*) list[irun]->FindObject("fMCPta0");
   }
@@ -20,6 +24,26 @@ int analyze_MCP() {
     TRKxyMCPI[irun]->Draw("colz");
     TRKxyMCPI[irun]->GetXaxis()->SetRangeUser(10,21);
     TRKxyMCPI[irun]->GetYaxis()->SetRangeUser(20,30);
+  }
+
+  TCanvas *cTRKxyMCP0 = new TCanvas();
+  cTRKxyMCP0->Divide(4,4);
+  for(int irun=0; irun!=15; ++irun) {
+    cTRKxyMCP0->cd(irun+1)->SetGridx(1);
+    cTRKxyMCP0->cd(irun+1)->SetGridy(1);
+    TRKxyMCP0[irun]->Draw("colz");
+    TRKxyMCP0[irun]->GetXaxis()->SetRangeUser(5,25);
+    TRKxyMCP0[irun]->GetYaxis()->SetRangeUser(15,35);
+  }
+
+  TCanvas *cTRKxyMCP1 = new TCanvas();
+  cTRKxyMCP1->Divide(4,4);
+  for(int irun=0; irun!=15; ++irun) {
+    cTRKxyMCP1->cd(irun+1)->SetGridx(1);
+    cTRKxyMCP1->cd(irun+1)->SetGridy(1);
+    TRKxyMCP1[irun]->Draw("colz");
+    TRKxyMCP1[irun]->GetXaxis()->SetRangeUser(5,25);
+    TRKxyMCP1[irun]->GetYaxis()->SetRangeUser(15,35);
   }
 
   TCanvas *cMCPta0 = new TCanvas();

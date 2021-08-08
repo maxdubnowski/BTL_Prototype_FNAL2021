@@ -72,8 +72,6 @@ bool mcp::Process() {
 
   // improving time
   
-  //double thr = -100;
-  //if(rawmaxy>thr) return false;
   double thr = rawmaxy*0.5;
   if(thr>-50) return false; // get rid of noise
   if(rawmaxy<-700) return false; // get rid of saturating pulses
