@@ -42,7 +42,7 @@ mcp::mcp(TString name) {
   fList->Add( fTime_t500 );
   fTime_t501 = new TH2D(Form("%s_T_thr501",name.Data()),
                         Form("%s_T_thr501;[mV];[ns]",name.Data()),
-                        100,0,1000,100,0,200);
+                        100,0,1000,100,90,120);
   fList->Add( fTime_t501 );
 }
 //=================================
@@ -50,7 +50,7 @@ mcp::~mcp() {
   delete fList;
 }
 //=================================
-bool mcp::Process() {
+bool mcp::Process(double noiseLevel) {
   SetAmplitude(-9999);
   SetTime(-9999);
 
@@ -72,9 +72,9 @@ bool mcp::Process() {
 
   // improving time
   
-  double thr = rawmaxy*0.5;
-  if(thr>-50) return false; // get rid of noise
+  if(rawmaxy>noiseLevel) return false; // get rid of noise
   if(rawmaxy<-700) return false; // get rid of saturating pulses
+  double thr = rawmaxy*0.5;
 
   double timeX;
   FindThreshold_P1( timeX, thr, 1, 1);

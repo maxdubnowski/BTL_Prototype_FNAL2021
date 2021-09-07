@@ -12,7 +12,7 @@ class mcp : public DRSWAVE {
 public:
   mcp(TString name);
   ~mcp();
-  bool Process();
+  bool Process(double noiseLevel=500);
   TList* GetList() {return fList;}
 
 private:

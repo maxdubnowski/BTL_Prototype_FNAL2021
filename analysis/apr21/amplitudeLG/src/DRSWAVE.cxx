@@ -4,6 +4,7 @@
 
 //=================================
 DRSWAVE::DRSWAVE() : TGraph(1024) {
+  fRefTime = -9999;
 }
 //=================================
 DRSWAVE::~DRSWAVE() {
@@ -31,6 +32,8 @@ void DRSWAVE::GetBaseline(double &mean, double &sdev, int irange, int frange) {
 //=================================
 void DRSWAVE::GetSampleSum(double &sum, int irange, int frange) {
   sum=0;
+  if(irange<0) irange=0;
+  if(frange<0) frange=1024;
   for(int i=irange; i!=frange; ++i) {
     double val = GetPointY(i);
     sum += val;
@@ -76,7 +79,14 @@ void DRSWAVE::ShiftWave(double cte) {
 void DRSWAVE::ShiftWave(double ref[1024]) {
   for(int i=0; i!=1024; ++i) {
     double val = GetPointY(i);
-    SetPointY(i,val+ref[i]);
+    SetPointY(i,val-ref[i]);
+  }
+}
+//=================================
+void DRSWAVE::ShiftWave(float ref[1024]) {
+  for(int i=0; i!=1024; ++i) {
+    double val = GetPointY(i);
+    SetPointY(i,val-ref[i]);
   }
 }
 //=================================

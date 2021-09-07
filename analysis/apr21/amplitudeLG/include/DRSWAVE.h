@@ -18,7 +18,14 @@ public:
   void FindMinimum_P2(double &ymin, double &xmin, int leftpoints=3, int rightpoints=3);
   void ShiftWave(double cte);
   void ShiftWave(double ref[1024]);
+  void ShiftWave(float ref[1024]);
   void ShiftWave(TGraph *ref);
+
+  double GetAvgEne() {return fAvgEne;}
+  void SetAvgEne(double val) {fAvgEne=val;}
+
+  double GetRefTime() {return fRefTime;}
+  void SetRefTime(double val) {fRefTime=val;}
 
   double GetAmplitude() {return fAmplitude;}
   double GetTime() {return fTime;}
@@ -36,6 +43,9 @@ public:
 private:
   void LinearFit(int ini=0, int fin=1024);
   void QuadraticFit(int ini=0, int fin=1024);
+
+  double fAvgEne;
+  double fRefTime;
 
   double fAmplitude;
   double fTime;

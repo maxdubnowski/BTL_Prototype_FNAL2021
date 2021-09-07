@@ -4,6 +4,7 @@
 
 //=================================
 DRSWAVE::DRSWAVE() : TGraph(1024) {
+  fRefTime = -9999;
 }
 //=================================
 DRSWAVE::~DRSWAVE() {
@@ -29,7 +30,17 @@ void DRSWAVE::GetBaseline(double &mean, double &sdev, int irange, int frange) {
   sdev=sqrt(vals*sxx-sx*sx)/(vals*(vals-1));
 }
 //=================================
-void DRSWAVE::GetMinimum(double &ymin, double &xmin, int irange, int frange, int idelta) {
+void DRSWAVE::GetSampleSum(double &sum, int irange, int frange) {
+  sum=0;
+  if(irange<0) irange=0;
+  if(frange<0) frange=1024;
+  for(int i=irange; i!=frange; ++i) {
+    double val = GetPointY(i);
+    sum += val;
+  }
+}
+//=================================
+int DRSWAVE::GetMinimum(double &ymin, double &xmin, int irange, int frange, int idelta) {
   double temp = 2000;
   int imiddle = -1;
   for(int i=irange; i!=frange; ++i) {
@@ -55,6 +66,7 @@ void DRSWAVE::GetMinimum(double &ymin, double &xmin, int irange, int frange, int
   }
   ymin = sy / vals;
   xmin = sxy / sy;
+  return imiddle;
 }
 //=================================
 void DRSWAVE::ShiftWave(double cte) {
@@ -67,7 +79,14 @@ void DRSWAVE::ShiftWave(double cte) {
 void DRSWAVE::ShiftWave(double ref[1024]) {
   for(int i=0; i!=1024; ++i) {
     double val = GetPointY(i);
-    SetPointY(i,val+ref[i]);
+    SetPointY(i,val-ref[i]);
+  }
+}
+//=================================
+void DRSWAVE::ShiftWave(float ref[1024]) {
+  for(int i=0; i!=1024; ++i) {
+    double val = GetPointY(i);
+    SetPointY(i,val-ref[i]);
   }
 }
 //=================================
@@ -84,6 +103,8 @@ void DRSWAVE::FindThreshold_P1(double &x, double thr, int leftpoints, int rightp
     double val = GetPointY(i);
     if(val<thr) break;
   }
+  x=-999;
+  if(i==1023) return;
   int imin = i-leftpoints;
   int imax = i+rightpoints-1;
   if(0) {
@@ -93,6 +114,13 @@ void DRSWAVE::FindThreshold_P1(double &x, double thr, int leftpoints, int rightp
     LinearFit(imin,imax+1);
     x = (thr - fLFb) / fLFa;
   }
+}
+//=================================
+void DRSWAVE::FindMinimum_P2(double &ymin, double &xmin, int ini, int fin) {
+  QuadraticFit(ini,fin);
+  xmin = -fQFb/fQFa/2.0;
+  //ymin = fQFb*(fQFc/fQFb+xmin/2.0);
+  ymin = fQFa*( xmin*xmin + fQFb/fQFa*xmin + fQFc/fQFa);
 }
 //=================================
 void DRSWAVE::LinearFit(int ini, int fin) {
@@ -132,5 +160,38 @@ void DRSWAVE::LinearFit(int ini, int fin) {
     var_a *= chi2;
     var_b *= chi2;
   }
+}
+//=================================
+void DRSWAVE::QuadraticFit(int ini, int fin) {
+  double Sx=0;
+  double Sy=0;
+  double Sxx=0;
+  double Sxy=0;
+  double Sxxx=0;
+  double Sxxxx=0;
+  double Sxxy=0;
+  double S=0;
+  for(int i=ini; i!=fin; ++i) {
+    double x = GetPointX( i );
+    double y = GetPointY( i );
+    S += 1;
+    Sx += x;
+    Sy += y;
+    Sxx += x*x;
+    Sxxx += x*x*x;
+    Sxxxx += x*x*x*x;
+    Sxy += x*y;
+    Sxxy += x*x*y;
+  }
+  /// Sxxxx  Sxxx  Sxx     |  a  |    Sxxy
+  /// Sxxx    Sxx    Sx      |  b  |    Sxy
+  /// Sxx      Sx      S       |  c  |     Sy
+  double det = Sxxxx*(Sxx*S-Sx*Sx) - Sxxx*(Sxxx*S-Sx*Sxx) + Sxx*(Sxxx*Sx-Sxx*Sxx);
+  /// S Sxx - Sx Sx         | Sx Sxx - S Sxxx        | Sx Sxxx - Sxx Sxx
+  /// Sx Sxx - S Sxxx     | S Sxxxx - Sxx Sxx     | Sxx Sxxx - Sx Sxxxx
+  /// Sx Sxxx - Sxx Sxx  | Sxx Sxxx - Sx Sxxxx | Sxx Sxxxx - Sxxx Sxxx
+  fQFa = ( Sxxy*(Sxx*S-Sx*Sx)     + Sxy*(Sxx*Sx-Sxxx*S)     + Sy*(Sxxx*Sx-Sxx*Sxx) )     / det;
+  fQFb = ( Sxxy*(Sx*Sxx-Sxxx*S)   + Sxy*(Sxxxx*S-Sxx*Sxx)   + Sy*(Sxx*Sxxx-Sxxxx*Sx) )   / det;
+  fQFc = ( Sxxy*(Sxxx*Sx-Sxx*Sxx) + Sxy*(Sxxx*Sxx-Sxxxx*Sx) + Sy*(Sxxxx*Sxx-Sxxx*Sxxx) ) / det;
 }
 
