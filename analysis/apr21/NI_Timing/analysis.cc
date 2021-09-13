@@ -13,7 +13,8 @@ int main(int argn, char **argv) {
 
   //TString ifile = Form("/Volumes/uva/testbeam_2021_may_copied/merged/Run_%d.root",run);
   //TString ifile = Form("Run_%d.root",run);
-  TString ifile = Form("/Volumes/uva/testbeam_2021_apr/merged/Run_%d.root",run);
+  //TString ifile = Form("/Volumes/uva/testbeam_2021_apr/merged/Run_%d.root",run);
+  TString ifile = Form("/eos/cms/store/group/dpg_mtd/comm_mtd/TB/MTDTB_FNAL_Apr2021/DRS/withTracks/v4/Run_%d.root",run);
   TString ofile = Form("AnalysisOutput_%d.root",run);
 
   testbeam *tb = new testbeam(run);
